@@ -463,3 +463,57 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+//New system calls
+
+//clone mostly copied from fork
+int
+clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
+  int i, pid;
+  struct proc *np;
+
+  // Allocate process.
+  if((np = allocproc()) == 0)
+    return -1;
+
+  // Copy process state from p.
+  if((np->pgdir = copyuvm(proc->pgdir, proc->sz)) == 0){
+    kfree(np->kstack);
+    np->kstack = proc->kstack;
+    np->state = UNUSED;
+    return -1;
+  }
+  np->sz = proc->sz;
+  np->parent = proc;
+  *np->tf = *proc->tf;
+ 
+ //Change stack to one provided by user,  page table to same as old process.
+  np->stack = new_stack;
+  np->pgdir = proc->pgdir;
+ 
+  for(i = 0; i < NOFILE; i++)
+    if(proc->ofile[i])
+      np->ofile[i] = filedup(proc->ofile[i]);
+  np->cwd = idup(proc->cwd);
+
+  safestrcpy(np->name, proc->name, sizeof(proc->name));
+ 
+  pid = np->pid;
+
+  // lock to force the compiler to emit the np->state write last.
+  acquire(&ptable.lock);
+  np->state = RUNNABLE;
+  release(&ptable.lock);
+  
+  return pid;
+}
+
+int
+join(int pid, void* stack, void** ret_val) {
+    return 0;
+}
+
+int
+texit() {
+    return 0;
+}
