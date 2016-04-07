@@ -487,9 +487,11 @@ clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
   np->parent = proc;
   *np->tf = *proc->tf;
  
+ //THREAD STUFF
  //Change stack to one provided by user,  page table to same as old process.
   np->stack = new_stack;
   np->pgdir = proc->pgdir;
+  //END THREAD STUFF
  
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
