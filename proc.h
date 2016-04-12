@@ -68,6 +68,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   
   //Stuff for threads
+  char thread;                 //Simple indicator if thread
 };
 
 // Process memory is laid out contiguously, low addresses first:

@@ -489,7 +489,8 @@ clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
  
  //THREAD STUFF
  //Change stack to one provided by user,  page table to same as old process.
-  np->stack = new_stack;
+  //np->stack = new_stack; where do we put the new stack
+  np->thread = 1;
   np->pgdir = proc->pgdir;
   //END THREAD STUFF
  
