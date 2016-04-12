@@ -490,8 +490,10 @@ clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
  //THREAD STUFF
  //Change stack to one provided by user,  page table to same as old process.
   //np->stack = new_stack; where do we put the new stack
-  np->thread = 1;
   np->pgdir = proc->pgdir;
+  //set tf-esp to new stack
+  //push onto new stack pointer to function and argument
+  //push return to 0xFFFFFFFF
   //END THREAD STUFF
  
   for(i = 0; i < NOFILE; i++)
@@ -512,7 +514,7 @@ clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
 }
 
 int
-join(int pid, void* stack, void** ret_val) {
+join(int pid, void** stack, void** ret_val) {
     return 0;
 }
 

@@ -26,7 +26,7 @@ int uptime(void);
 int halt(void);
 //Thread system calls
 int clone(void(*)(void*), void*, void*);
-int join(int, void*, void**);
+int join(int, void**, void**);
 int texit(void);
 
 // ulib.c
