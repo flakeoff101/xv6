@@ -468,7 +468,7 @@ procdump(void)
 
 //clone mostly copied from fork
 int
-clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
+clone( void (*func_ptr)(void*), void* argv, void* new_stack ) {
   int i, pid;
   struct proc *np;
 
@@ -488,12 +488,14 @@ clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
   *np->tf = *proc->tf;
  
  //THREAD STUFF
- //Change stack to one provided by user,  page table to same as old process.
-  //np->stack = new_stack; where do we put the new stack
+ //Change stack to one provided by user,  page table to same as old process
   np->pgdir = proc->pgdir;
-  //set tf-esp to new stack
-  //push onto new stack pointer to function and argument
-  //push return to 0xFFFFFFFF
+  np->tf->esp = new_stack;    //set tf-esp to new stack
+  new_stack[0] = 0xffffffff;  //push return to 0xFFFFFFFF
+  new_stack[1] = func_ptr;    //push onto new stack pointer to function and argument
+  new_stack[2] = argv;
+  np->tf->eip = (new_stack - 1);  //set instruction pointer to function call
+  np->tf->esp -= 3;               //decrements esp
   //END THREAD STUFF
  
   for(i = 0; i < NOFILE; i++)
