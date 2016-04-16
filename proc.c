@@ -496,6 +496,8 @@ clone( void *(*func_ptr)(void*), void* ret_value, void* new_stack ) {
   new_stack[2] = argv;
   np->tf->eip = (new_stack - 1);  //set instruction pointer to function call
   np->tf->esp -= 3;               //decrements esp
+  np->parent = proc;              //Sets parent to main thread
+  np->thread = 1;
   //END THREAD STUFF
  
   for(i = 0; i < NOFILE; i++)
@@ -515,12 +517,50 @@ clone( void *(*func_ptr)(void*), void* ret_value, void* new_stack ) {
   return pid;
 }
 
+// Similar to wait() call but don't want to free kernel stack or page table
 int
 join(int pid, void** stack, void** ret_val) {
-    return 0;
+  int havekids = 0;
+  acquire(&ptable.lock);
+  for(;;) {
+    
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->thread != 1)
+        continue;
+      if(p->parent != proc || p->pid != pid)
+        continue;
+      havekids = 1;
+      if(p->state == ZOMBIE){
+        // Found one.
+        *ret_val = p->ret_val;
+        p->state = UNUSED;
+        p->pid = 0;
+        p->parent = 0;
+        p->name[0] = 0;
+        p->killed = 0;
+        release(&ptable.lock);
+        return 0;
+      }
+    }
+    
+    if(!havekids || proc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+    
+    sleep(proc, &ptable.lock);
+  }
+    return -1;
 }
 
+//Sets ret_value and state to ZOMBIE and wakes up potentially sleeping parent.
+//Threads that aren't joined on by parent should be cleaned up by exit()
 int
 texit(void* ret_val) {
+    proc->ret_val = ret_val;
+    proc->state = ZOMBIE;
+    wakeup1(proc->parent);
+    sched();
+    panic("zombie exit");
     return 0;
 }
