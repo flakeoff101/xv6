@@ -120,7 +120,7 @@ void            wakeup(void*);
 void            yield(void);
 //Thread system calls
 int             clone(void(*)(void*), void*, void*);
-int             join(int, void*, void**);
+int             join(int, void**, void**);
 int             texit(void);
 
 // swtch.S
