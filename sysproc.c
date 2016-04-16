@@ -112,7 +112,7 @@ sys_clone(void)
     argint(1, &arg);
     argint(2, &stack);
     
-    clone( (void (*)(void*))func, (void*)arg, (void*)stack );
+    clone( (void *(*)(void*))func, (void*)arg, (void*)stack );
     return 0;
 }
 
@@ -131,6 +131,8 @@ sys_join(void)
 int
 sys_texit(void)
 {
-    texit();
+    int ret_val;
+    argint(0, &ret_val)
+    texit((void*)ret_val);
     return 0;
 }

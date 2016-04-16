@@ -468,7 +468,7 @@ procdump(void)
 
 //clone mostly copied from fork
 int
-clone( void (*func_ptr)(void*), void* ret_value, void* new_stack ) {
+clone( void *(*func_ptr)(void*), void* ret_value, void* new_stack ) {
   int i, pid;
   struct proc *np;
 
@@ -519,6 +519,6 @@ join(int pid, void** stack, void** ret_val) {
 }
 
 int
-texit() {
+texit(void* ret_val) {
     return 0;
 }
