@@ -493,9 +493,11 @@ clone( void *(*func_ptr)(void*), void* argv, void* new_stack ) {
   esp--;
   
   *esp = (int)argv;                 //push function arg onto stack
+  esp--;
   
   np->tf->esp = (int)esp;
-  np->tf->eip = np->tf->esp + 4;  //set instruction pointer to function call
+  np->tf->ebp = (int)esp + 12;
+  np->tf->eip = np->tf->esp + 8;  //set instruction pointer to function call
 
   //END THREAD STUFF
  
