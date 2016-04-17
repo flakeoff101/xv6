@@ -107,32 +107,32 @@ sys_halt(void)
 int
 sys_clone(void)
 {
-    int func, arg, stack;
+    int func, arg, stack, pid;
     argint(0, &func);
     argint(1, &arg);
     argint(2, &stack);
     
-    clone( (void *(*)(void*))func, (void*)arg, (void*)stack );
-    return 0;
+    pid = clone( (void *(*)(void*))func, (void*)arg, (void*)stack );
+    return pid;
 }
 
 int
 sys_join(void)
 {
-    int pid, stack, ret_val;
+    int pid, stack, ret_val, result;
     argint(0, &pid);
     argint(1, &stack);
     argint(2, &ret_val);
     
-    join(pid, (void**)stack, (void**)ret_val);
-    return 0;
+    result = join(pid, (void**)stack, (void**)ret_val);
+    return result;
 }
 
 int
 sys_texit(void)
 {
-    int ret_val;
+    int ret_val, result;
     argint(0, &ret_val);
-    texit((void*)ret_val);
-    return 0;
+    result = texit((void*)ret_val);
+    return result;
 }

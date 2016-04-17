@@ -512,8 +512,6 @@ clone( void *(*func_ptr)(void*), void* argv, void* new_stack ) {
   acquire(&ptable.lock);
   np->state = RUNNABLE;
   release(&ptable.lock);
-  
-  cprintf("return pid is %d\n", pid);
   return pid;
 }
 
