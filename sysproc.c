@@ -132,7 +132,7 @@ int
 sys_texit(void)
 {
     int ret_val;
-    argint(0, &ret_val)
+    argint(0, &ret_val);
     texit((void*)ret_val);
     return 0;
 }
