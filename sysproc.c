@@ -124,7 +124,7 @@ sys_join(void)
     argint(1, &stack);
     argint(2, &ret_val);
     
-    join(pid, (void*)stack, (void**)ret_val);
+    join(pid, (void**)stack, (void**)ret_val);
     return 0;
 }
 
