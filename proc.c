@@ -476,21 +476,15 @@ clone( void *(*func_ptr)(void*), void* argv, void* new_stack ) {
   // Allocate process.
   if((np = allocproc()) == 0)
     return -1;
-
-  // Copy process state from p.
-  if((np->pgdir = copyuvm(proc->pgdir, proc->sz)) == 0){
-    kfree(np->kstack);
-    np->kstack = proc->kstack;
-    np->state = UNUSED;
-    return -1;
-  }
-  np->sz = proc->sz;
-  np->parent = proc;
-  *np->tf = *proc->tf;
- 
+  
  //THREAD STUFF
  //Change stack to one provided by user,  page table to same as old process
   np->pgdir = proc->pgdir;
+  np->sz = 4096;
+  np->parent = proc;
+  np->thread = 1;
+  *np->tf = *proc->tf;
+  
   esp = (int*)((char*)new_stack + 4095);    //set tf-esp to new stack
   *esp = 0xFFFFFFFF;                //push return to 0xFFFFFFFF
   esp--;                         
@@ -502,18 +496,16 @@ clone( void *(*func_ptr)(void*), void* argv, void* new_stack ) {
   
   np->tf->esp = (int)esp;
   np->tf->eip = np->tf->esp + 4;  //set instruction pointer to function call
-  
-  np->parent = proc;              //Sets parent to main thread
-  np->thread = 1;
+
   //END THREAD STUFF
  
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
       np->ofile[i] = filedup(proc->ofile[i]);
   np->cwd = idup(proc->cwd);
-
+  
   safestrcpy(np->name, proc->name, sizeof(proc->name));
- 
+  
   pid = np->pid;
 
   // lock to force the compiler to emit the np->state write last.
@@ -521,6 +513,7 @@ clone( void *(*func_ptr)(void*), void* argv, void* new_stack ) {
   np->state = RUNNABLE;
   release(&ptable.lock);
   
+  cprintf("return pid is %d\n", pid);
   return pid;
 }
 
@@ -566,8 +559,9 @@ join(int pid, void** stack, void** ret_val) {
 int
 texit(void* ret_val) {
     proc->ret_val = ret_val;
-    proc->state = ZOMBIE;
+    acquire(&ptable.lock);
     wakeup1(proc->parent);
+    proc->state = ZOMBIE;
     sched();
     panic("zombie exit");
     return 0;
